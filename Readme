@@ -1,0 +1,25 @@
+If researchers want to introduce systematic heterogenization into their lab experiment, they are confronted with the question of how to adequately power their experiment? 
+To make principled sample size choices, researchers must decide which effects they are interested in detecting. For example, an experiment might be well powered for a strong main effect, but be at the same time underpowered to reliably detect an interaction effect between the intervention and animal sex in a 2 x 2 factorial design with intervention and animal sex as factors. In case systematic heterogenization is introduced to check the robustness of the main effect but the actual interaction effect estimates are not of interest, researchers should explore whether the magnitude of the effect size of the interaction influences the size of the main effect. This is the first aim of our simulation. 
+Secondly, if the researcher is interested in estimating the interaction effect between two factors, this effect size should be chosen to determine the sample size, since most likely the interaction effect size will be smaller then the main effect size. 
+
+We would like to present different scenarios: 
+
+A) A simple 2 x 2 design with intervention = {control, treatment} and animal sex = {male, female} for which we are interested in detecting an interaction effect of intervention x animal sex. 
+
+B) A scenario under which the researcher adds other factors: 
+  B1) age  = {young, old} --> of interest 
+  B2) environment  = {enriched1,standard} --> robustness check 
+  
+C) Scenario B with multiple intervention groups: 
+  C1) intervention = {dose1, pos.control, neg.control}
+      animal sex = {male, female}
+      age = {young, old}
+      environment = {enriched, standard}
+  C2) intervention = {dose1, dose2, pos.control, neg.control}
+      animal sex = {male, female}
+      age = {young, old}
+      environment = {enriched, standard}
+
+
+
+

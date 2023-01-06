@@ -1,23 +1,15 @@
 library(Superpower)
 library(tidyverse)
+library(gridExtra)
+library(grid)
 
 
-# functions to calculate total N with power = 80% and alpha-level = 0.05
-# for the main effect a (treatment vs. control)
-
-calculate_ntotal_interaction <- function(d_ab, power = 0.8, alpha = 0.05) {
-  numerator <- (4 * (qnorm(1 - alpha/2)+qnorm(power))^2)
-  ntotal <- numerator/(d_ab^2)
-}
-
-calculate_ntotal_main <- function(d_a, power = 0.8, alpha = 0.05) {
-  numerator <- (4 * (qnorm(1 - alpha/2)+qnorm(power))^2)
-  ntotal <- numerator/(d_a^2)
-}
-
+source("./superpower/functions_superpower.R")
 
 # scenario: no interaction 
 
+# a: intervention, a1: control , a2: treatment 
+# b: animal sex, b1: male, b2: female 
 
 a1_b1 <- rep(0.5, 20) 
 a1_b2 <- rep(0.7, 20) 
@@ -104,10 +96,16 @@ design_result_no_interaction <- ANOVA_design(
 image_no_interaction <- design_result_no_interaction$meansplot
 
 no_interaction_n <- ggplot(dat) + 
-                      geom_point(aes(x = d_a, y = log_ntotal_main_a, color = d_ab))
+                      geom_point(aes(x = d_a, 
+                                     y = log_ntotal_main_a, 
+                                     color = d_ab))
+no_interaction_n
 
-
-no_interaction_full <- grid.arrange(no_interaction_n, image_no_interaction, ncol = 2) 
+no_interaction_full <- grid.arrange(
+  no_interaction_n, 
+  image_no_interaction, ncol = 2, 
+  top=textGrob("2x2 Factorial design sample size choice under no interaction",
+               gp=gpar(fontsize=20,font=1))) 
 
 
 

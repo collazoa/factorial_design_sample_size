@@ -1,0 +1,21 @@
+Notes: superpower_interaction_scenarios_2x2.R 
+
+Design: 2 x 2 
+Factors:  intervention = {control, treatment}
+          animal sex = {male, female}
+Sample size: 
+          n1 = 10 per group 
+          n2 = 20 per group 
+          
+Standard deviation in each group: 
+          sd = 1 
+          
+
+We assume, it is known that female and male animals in the control group show slightly different values. This information was taken from other experiments using the same animal model. 
+Researchers now want to explore
+
+a) whether the treatment shows a different effect in male and female animals. They are not sure about that and therefore envision different scenarios for male and female animals in the treatment group 
+
+b) researchers are only interested in the main effect but worried that the introduction of the factor "animal sex" will lower their power. They had planned to base their sample size estimation on estimates from a previous study in male animals. 
+
+

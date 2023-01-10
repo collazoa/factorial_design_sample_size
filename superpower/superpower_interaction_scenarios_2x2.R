@@ -110,7 +110,8 @@ no_interaction_full <- grid.arrange(
 
 
 
-
+grob <- grobTree(textGrob(c("A", "B", "C", "D"), x=0.97,  y=0.97, hjust=0,
+                          gp=gpar(col="black", fontsize=16, fontface="bold")))
 
 
 # scenario: partially attenuated interaction 
@@ -125,9 +126,12 @@ design_result_partial_interaction <- ANOVA_design(
   plot = TRUE)
 
 
-image_partial_interaction <- design_result_partial_interaction$meansplot
+fig_partial <- design_result_partial_interaction$meansplot + 
+  labs(title = "Partially attenuated interaction")+ 
+  annotation_custom(grob[1])+
+  theme_classic()
 
-
+fig_partial
 
 # scenario: fully attenuated interaction 
 
@@ -140,11 +144,16 @@ design_result_fully_interaction <- ANOVA_design(
                  "male", "female"), 
   plot = TRUE)
 
+fig_full <- design_result_fully_interaction$meansplot + 
+  labs(title = "Fully attenuated interaction")+ 
+  theme_classic()
+fig_full
+
 ANOVA_exact(design_result_fully_interaction)
 
 # scenario: cross-over interaction 
 
-design_result_crossover_interaction <- ANOVA_design(
+cross_over <- design_result_crossover_interaction <- ANOVA_design(
   design = "2b*2b", n = 10, 
   mu = c(0.3, 0.2, 0.1, 0.7), sd = 0.5, 
   labelnames = c("a",
@@ -152,6 +161,10 @@ design_result_crossover_interaction <- ANOVA_design(
                  "b",
                  "male", "female"), 
   plot = TRUE)
+
+fig_cross <- cross_over$meansplot
+fig_cross <- fig_cross + labs(title = "Cross-over interaction")+ 
+  theme_classic()
 
 ANOVA_exact(design_result_crossover_interaction)
 

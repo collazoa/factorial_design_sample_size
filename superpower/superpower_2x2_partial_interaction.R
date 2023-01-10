@@ -1,9 +1,4 @@
-library(Superpower)
-library(tidyverse)
-library(gridExtra)
-library(grid)
-
-
+source("./packages_interaction.R")
 source("./superpower/functions_superpower.R")
 
 # scenario: partially attenuated interaction 
@@ -34,8 +29,8 @@ dat <- dat %>%
 
 for (i in 1:nrow(dat)) {
   design_result_no_interaction <- ANOVA_design(
-    design = "2b*2b", n = as.numeric(dat[i, 5]),
-    mu = as.numeric(dat[i, 1:4]), sd = as.numeric(dat[1, 6]),
+    design = "2b*2b", n = as.numeric(dat[i, 6]),
+    mu = as.numeric(dat[i, 2:5]), sd = as.numeric(dat[i, 7]),
     labelnames = c("a",
                    "control", "treatment",
                    "b",
@@ -81,6 +76,13 @@ dat <- dat %>%
 
 dat <- dat %>%
   mutate(log_ntotal_main_a = log10(ntotal_main_a))
+
+
+
+
+
+
+
 
 
 

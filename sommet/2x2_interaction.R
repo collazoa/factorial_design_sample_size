@@ -98,17 +98,18 @@ ggplot(data = df) +
 logvalues <- c(1.5, 2, 2.5, 3, 3.5, 4)
 trans <- ceiling(10^logvalues)
 
-ggplot(data = df) + 
-  geom_tile(mapping = aes(x = d1, y = d2, fill = log_ntotal))+
-  geom_hline(yintercept = 0, linetype = "dashed")+
-  geom_vline(xintercept = 0, linetype = "dashed")+
-  scale_fill_gradient(low="white", high="blue", name = "log10(n_total)")+ 
-  labs(title = "Total sample size depending on treatment effect within subgroups")+
-  xlab(expression("Cohen's d "["k = 1"]))+ 
-  ylab(expression("Cohen's d "["k = 0"]))+
-  theme(axis.line = element_blank(),
-        plot.title = element_text(face="bold"),
-        plot.subtitle = element_text(face="bold"),
-        axis.title = element_text(face = "bold"))
+fig2<- ggplot(data = df) + 
+        geom_tile(mapping = aes(x = d1, y = d2, fill = log_ntotal))+
+        geom_hline(yintercept = 0, linetype = "dashed")+
+        geom_vline(xintercept = 0, linetype = "dashed")+
+        scale_fill_gradient(low="white", high="blue", name = "log10(n_total)")+ 
+        labs(title = "Total sample size depending on treatment effect within subgroups")+
+        xlab(expression("Cohen's d "["main"]^"k= male"))+ 
+        ylab(expression("Cohen's d "["main"]^"k = female"))+
+        theme(axis.line = element_blank(),
+              plot.title = element_text(face="bold"),
+              plot.subtitle = element_text(face="bold"),
+              axis.title = element_text(face = "bold"))
+fig2
 
-
+ggsave("fig2.png", plot = fig2)

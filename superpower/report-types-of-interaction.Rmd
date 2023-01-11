@@ -1,0 +1,157 @@
+---
+title: "Report on shapes of interaction"
+author: "Clarissa F. D. Carneiro"
+date: "2023-01-11"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+It is intuitive that the shape of interactions should have an impact on the statistical power to detect the interaction effect, but this is only indirectly true. The only driver for changing power is the interaction effect size, considering constant standard deviations and sample sizes. The shape of interaction will have an impact on the likelihood of finding smaller or larger interaction effect sizes.
+
+To demonstrate this, we created a dataset for a 2x2 design where the mean of each group could take any of the following values: 0, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8 or 2.0. Sample size was fixed at 10 (per group) and standard deviation was fixed at 0.5.
+
+```{r}
+a1_b1 <- seq(from = 0,to = 2,by = 0.2)
+a1_b2 <- seq(from = 0,to = 2,by = 0.2)
+a2_b1 <- seq(from = 0,to = 2,by = 0.2)
+a2_b2 <- seq(from = 0,to = 2,by = 0.2)
+n <- c(10)
+sd <- c(0.5)
+
+
+report <- expand.grid(a1_b1 = a1_b1, 
+                      a1_b2 = a1_b2, 
+                      a2_b1 = a2_b1, 
+                      a2_b2 = a2_b2, 
+                      n = n, 
+                      sd = sd)
+```
+
+Then, for all possible scenarios (combinations of means for all 4 groups) we calculated the effect sizes for each main effect and interaction effects and statistical power for each effect size. 
+```{r results='hide'}
+library(Superpower)
+for (i in 1:nrow(report)) {
+  
+  design_result <- ANOVA_design(
+    design = "2b*2b", n = report[i,5],
+    mu = as.numeric(report[i,1:4]), sd = report[i,6],
+    labelnames = c("a",
+                   "treatment", "control",
+                   "b",
+                   "male", "female"), 
+    plot = FALSE)
+  
+  result_exact <- ANOVA_exact(design_result)
+  
+  report$f_a[i] <- result_exact$main_results$cohen_f[1]
+  report$f_b[i] <- result_exact$main_results$cohen_f[2]
+  report$f_ab[i] <- result_exact$main_results$cohen_f[3]
+  
+  report$pwr_a[i] <- result_exact$main_results$power[1]
+  report$pwr_b[i] <- result_exact$main_results$power[2]
+  report$pwr_ab[i] <- result_exact$main_results$power[3]
+  
+}
+```
+
+First, we can see how power varies according to the interaction effect size:
+```{r echo=FALSE}
+ggplot(report)+ 
+  geom_point(aes(x = f_ab, y = pwr_ab)) + 
+  geom_hline(yintercept = 80, linetype = "dashed", color = "red")
+```
+
+Next, we classified the types of interactions (following taxonomy by Sommet et al. 2022).
+```{r}
+report4 = report %>% mutate(delta1 = a1_b1-a2_b1)
+report4 = report4 %>% mutate(delta2 = a1_b2-a2_b2)
+
+report4 = report4 %>% filter(f_ab!=0)
+
+report4 = report4 %>% mutate(type_int = case_when(
+  (delta1==delta2) ~ "no interaction",
+  ((delta1!=delta2 & delta1<0 & delta2<0)|(delta1!=delta2 & delta1>0 & delta2>0)) ~ "partially attenuated",
+  ((delta1==0 & delta2!=0)|(delta2==0 & delta1!=0)) ~ "fully attenuated",
+  ((delta1<0 & delta2>0)|(delta1>0 & delta2<0)) ~ "reversed",
+  TRUE ~ "MISSING"))
+```
+
+Now, we can show that across all of these possible scenarios reversed interactions are more frequently found with larger effect sizes. Therefore, these types of interactions should be more frequently detected with high power.
+
+```{r echo=FALSE}
+main_graph = 
+  ggplot(report4, aes(y=f_ab, x=type_int)) + 
+  geom_violin(draw_quantiles = T)
+
+report4 %>% group_by(type_int) %>% summarize(median(f_ab))
+report4 %>% group_by(type_int) %>% summarize(median(pwr_ab))
+report4 %>% group_by(type_int) %>% summarize(n())
+
+## adding panels
+
+# fully attenuated example
+f_data = report4 %>% filter(type_int=="fully attenuated")
+f_data = slice_sample(f_data, n=1)
+
+f_data = f_data %>% select(c(a1_b1, a1_b2, a2_b1, a2_b2, type_int))
+f_data = reshape2::melt(f_data, id=c("type_int"))
+f_data = f_data %>% mutate(group_x = 
+                               if_else(grepl("a1", variable, ignore.case = T)==TRUE, "control", "treated"))
+f_data = f_data %>% mutate(group_c = 
+                               if_else(grepl("b1", variable, ignore.case = T)==TRUE, "male", "female"))
+
+
+f_example = 
+  ggplot(f_data, aes(x = group_x, y=value, colour=group_c, group=group_c)) +
+  geom_point() +
+  geom_line() + 
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank(), legend.position = "none", plot.margin = unit(c(0,0,0,0), "cm"))
+
+
+# partially attenuated example
+p_data = report4 %>% filter(type_int=="partially attenuated")
+p_data = slice_sample(p_data, n=1)
+
+p_data = p_data %>% select(c(a1_b1, a1_b2, a2_b1, a2_b2, type_int))
+p_data = reshape2::melt(p_data, id=c("type_int"))
+p_data = p_data %>% mutate(group_x = 
+                             if_else(grepl("a1", variable, ignore.case = T)==TRUE, "control", "treated"))
+p_data = p_data %>% mutate(group_c = 
+                             if_else(grepl("b1", variable, ignore.case = T)==TRUE, "male", "female"))
+
+
+p_example = 
+  ggplot(p_data, aes(x = group_x, y=value, colour=group_c, group=group_c)) +
+  geom_point() +
+  geom_line() + 
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank(), legend.position = "none", plot.margin = unit(c(0,0,0,0), "cm"))
+
+# reversed example
+r_data = report4 %>% filter(type_int=="reversed")
+r_data = slice_sample(r_data, n=1)
+
+r_data = r_data %>% select(c(a1_b1, a1_b2, a2_b1, a2_b2, type_int))
+r_data = reshape2::melt(r_data, id=c("type_int"))
+r_data = r_data %>% mutate(group_x = 
+                             if_else(grepl("a1", variable, ignore.case = T)==TRUE, "control", "treated"))
+r_data = r_data %>% mutate(group_c = 
+                             if_else(grepl("b1", variable, ignore.case = T)==TRUE, "male", "female"))
+
+
+r_example = 
+  ggplot(r_data, aes(x = group_x, y=value, colour=group_c, group=group_c)) +
+  geom_point() +
+  geom_line() + 
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank(), legend.position = "none", plot.margin = unit(c(0,0,0,0), "cm"))
+
+## final figure
+
+examples = cowplot::plot_grid(f_example, p_example, r_example, nrow = 1)
+
+cowplot::plot_grid(main_graph, examples, nrow = 2, rel_heights = c(3,1))
+
+```

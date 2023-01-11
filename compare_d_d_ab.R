@@ -61,3 +61,14 @@ ggsave("fig1.png", plot = fig1)
 fig2 <- ggplot(df) + 
           geom_line(aes(x = d_a, y = ratio_n, color = size_i)) 
 fig2
+
+
+fig3 = ggplot(df) +
+  geom_point(aes(x = d_a, y = n, color = size_i, shape = effect))+ 
+  scale_y_log10()+ 
+  annotation_logticks(sides = "l")+ 
+  labs(title = "Comparing n for main and interaction effect for 80% power",
+       x = "Cohen's d main effect")
+
+fig3
+ggsave("fig3.png", plot = fig3) 

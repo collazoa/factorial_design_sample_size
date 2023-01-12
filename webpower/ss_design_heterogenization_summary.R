@@ -196,3 +196,64 @@ fig1 <- grid.arrange(
 )
 
 fig1
+
+###########################################
+#
+# design with 2-5 factors with three levels
+# [3 x 3; 3 x 3 x 3; 3 x 3 x 3 x 3; 3 x 3 x 3 x 3 x 3]
+#
+###########################################
+
+
+# First we set the values for all given parameters. 
+# factors:  number of factors in the factorial design 
+# levels:   number of levels per factor (here always = 3)
+# f:        effect size f 
+# The effect size f is represents the ratio between the average variance of the 
+# effect of interest (e.g. main effect of factor 1) and the average variance of 
+# all groups. 
+# Reference: Zhang, Z., & Yuan, K.-H. (2018). Practical Statistical Power Analysis Using Webpower and R (Eds). Granger, IN: ISDSA Press.
+
+factors <- as.numeric(c(1,2,3,4,5))     
+levels <- as.numeric(c(3))
+f <- as.numeric(c(0.1, 0.25, 0.45))
+
+# expand.grid() produces all possible combinations of factors, levels and effect size f. 
+report3 <- expand.grid(factors = factors, levels = levels, f = f)
+
+
+# We add several other variables: 
+# ng:       total number of groups within the experiment given a specific number of factors and levels 
+# ndf_main: degrees of freedom, calculated for the main effect according to Zhang et al 2018 (number of levels - 1; p. 90)
+# According to standard practice, the type-I error rate alpha is set to 0.05, 
+# power to detect the main effect f set to 80%. 
+
+report3<- report %>% 
+  mutate (ng = factors * levels, 
+          ndf_main = (3-1), 
+          power = 0.8, 
+          alpha = 0.05, 
+          n_total = FALSE, 
+          design = rep(c("3", "3 x 3", "3 x 3 x 3", "3 x 3 x 3 x 3", "3 x 3 x 3 x 3 x 3"), 3),
+          cols=factor(report$f, labels = c(cols[1],cols[4], cols[6]))) 
+
+
+# The neccessary total number of animals in the experiment is than calculated 
+# with the WebPower::wp.kanova()
+
+for (i in 1:nrow(report3)) {
+  result <-  wp.kanova(
+    ndf = report3$ndf_main[i], 
+    f = report3$f[i], 
+    ng = report3$ng[i], 
+    alpha = report3$alpha[i], 
+    power = report3$power[i])
+  report3$n_total[i] <- result$n
+  
+}
+
+
+report3 <- report3%>% 
+  mutate(group_ss = n_total / ng)
+
+

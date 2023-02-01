@@ -39,9 +39,9 @@ Figure 1A
 # all groups. 
 # Reference: Zhang, Z., & Yuan, K.-H. (2018). Practical Statistical Power Analysis Using Webpower and R (Eds). Granger, IN: ISDSA Press.
 
-factors <- as.numeric(c(1,2,3,4,5))     
+factors <- as.numeric(c(1,2,3,4))     
 levels <- as.numeric(c(2))
-f <- as.numeric(c(0.1, 0.25, 0.45))
+f <- as.numeric(c(0.35, 0.5, 1.0))
 
 # expand.grid() produces all possible combinations of factors, levels and effect size f. 
 report <- expand.grid(factors = factors, levels = levels, f = f)
@@ -58,7 +58,7 @@ report<- report %>%
           power = 0.8, 
           alpha = 0.05, 
           n_total = FALSE, 
-          design = rep(c("2", "2 x 2", "2 x 2 x 2", "2 x 2 x 2 x 2", "2 x 2 x 2 x 2 x 2"), 3)) 
+          design = rep(c("2", "2 x 2", "2 x 2 x 2", "2 x 2 x 2 x 2"), 3)) 
 
 
 # The neccessary total number of animals in the experiment is than calculated 
@@ -87,9 +87,9 @@ Fig1A<-ggplot(report)+
   labs( x = "factorial design",
         y = "total sample size",
         color = "effect size f") +
-  scale_colour_viridis_d() +
-  scale_y_log10(limits = c(1,1100)) + 
-  annotation_logticks(sides = "l")
+  scale_colour_viridis_d() + 
+  theme_classic() + 
+  scale_y_continuous(limits = c(0,70), n.breaks = 7)
 
 Fig1A
 ```
@@ -113,7 +113,7 @@ Figure 1B
 factor1 <- as.numeric(c(2,3,4))
 factor2 <- as.numeric(2) 
 factor3 <- as.numeric(2)
-f <- as.numeric(c(0.1, 0.25, 0.45))
+f <- as.numeric(c(0.35, 0.5, 1.0))
 
 report2 <- expand.grid(factor1 = factor1, 
                       factor2 = factor2, 
@@ -150,9 +150,9 @@ Fig1B<-ggplot(report2)+
   labs( x = "factorial design",
         y = "total sample size",
         color = "effect size f") +
-  scale_colour_viridis_d() +
-  scale_y_log10(limits = c(1,1100)) + 
-  annotation_logticks(sides = "l")
+  scale_colour_viridis_d() + 
+  theme_classic() + 
+  scale_y_continuous(limits = c(0,100), n.breaks = 10)
 
 Fig1B
 ```
@@ -218,9 +218,7 @@ report3 <- expand.grid(d1 = d1, d2 = d2)
 # We are deleting rows in which the treatment effect of K = 1 equals the treatment effect 
 # in K = 2. Under this scenario, no interaction is observable. 
 report3 <- report3%>%
-        mutate(ntotal = NA, 
-               delete = c(report3$d1 == report3$d2))%>%
-        filter(delete == FALSE)
+        mutate(ntotal = NA)
 
 report3 <- report3%>%dplyr::select(d1, d2, ntotal)
 
@@ -237,6 +235,9 @@ for (i in 1:nrow(report3)) {
 
 
 report3$log_ntotal <- log10(report3$ntotal)
+
+report3$round_ntotal[report3$round_ntotal=="Inf"] = NA
+
 ```
 ```{r}
 logvalues <- c(1.5, 2, 2.5, 3, 3.5, 4)
@@ -244,17 +245,17 @@ trans <- ceiling(10^logvalues)
 
 Fig1C<- ggplot(data = report3) + 
         geom_tile(mapping = aes(x = d1, y = d2, fill = round_ntotal))+
-        geom_hline(yintercept = 0, linetype = "dashed")+
-        geom_vline(xintercept = 0, linetype = "dashed")+
-        scale_fill_gradient(low="white", high="black", name = "Sample size", trans = "log10")+
-        xlab(expression("Cohen's d "["main"]^"k1"))+ 
-        ylab(expression("Cohen's d "["main"]^"k2"))+
+        geom_hline(yintercept = 0, linetype = "dashed") +
+        geom_vline(xintercept = 0, linetype = "dashed") +
+        scale_fill_gradient(low="#dedede", high="black", name = "Sample size", trans = "log10", na.value = 'white')+
+        xlab(expression("Cohen's d "["main"]^"k1")) + 
+        ylab(expression("Cohen's d "["main"]^"k2")) +
         theme(axis.line = element_blank(),
               plot.title = element_text(face="bold"),
               plot.subtitle = element_text(face="bold"),
-              axis.title = element_text(face = "bold"))
+              axis.title = element_text(face = "bold")) + 
+  theme_classic()
 Fig1C
-
 ```
 
 ### Sample size requirements by interaction effect size
@@ -277,7 +278,7 @@ calculate_ntotal_main <- function(d_a, power = 0.8, alpha = 0.05) {
 
 # power curves
 
-d_a <- seq(0.1, 1.5, by = 0.1)
+d_a <- seq(0.5, 2.0, by = 0.1)
 
 d_ab2 <- d_a/2
 d_ab3 <- d_a/3
@@ -314,8 +315,7 @@ report4$size_i <- factor(report4$size_i,
 ```{r}
 Fig1D = ggplot(report4) +
   geom_point(aes(x = d_a, y = n, color = size_i, shape = effect))+ 
-  scale_y_log10()+ 
-  annotation_logticks(sides = "l")+ 
+  scale_y_continuous(limits = c(1,200))+
   labs(x = expression("Cohen's d "["main"]),
        y = "total sample size") +
   scale_shape_discrete(name = "effect size of interest",
@@ -325,7 +325,8 @@ Fig1D = ggplot(report4) +
                          labels = c("1/2 of the main effect size",
                                     "1/3 of the main effect size",
                                     "1/4 of the main effect size")) + 
-  geom_point(aes(x = d_a, y = n, shape = effect), data = report4 %>% filter(effect=="n_main"))
+  geom_point(aes(x = d_a, y = n, shape = effect), data = report4 %>% filter(effect=="n_main")) + 
+  theme_classic()
 
 
 

@@ -34,8 +34,6 @@ letter <- theme(plot.title = element_text(face="bold"),
 # ref: Sommet et al. 2022
 
 calculate_es_interaction <- function(d1, d2, power = 0.8, sdpooled = 1, alpha = 0.05) {
-  numerator <- (4 * (qnorm(1 - alpha/2)+qnorm(power))^2)
-  
   es_interaction <- abs((d1 - d2)/(2*sdpooled))
 }
 

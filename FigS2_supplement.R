@@ -85,7 +85,7 @@ fig_examples <- grid.arrange(
 
 
 # save 
-ggsave("fig_examples.png", plot = fig_examples)
+ggsave("FigS2_examples.png", plot = fig_examples)
 
 
 

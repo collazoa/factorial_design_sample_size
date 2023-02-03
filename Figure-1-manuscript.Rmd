@@ -171,7 +171,7 @@ For the main figure, we focused on the sample size requirements for detecting in
 
 ### Sample size requirements by effect size on each subgroup
 
-For this visualization, we present the sample sizes required for each combination of effect sizes of the main variable of interest (e.g., treatment effect) for each subgroup of the second factor in the design (e.g., sex, age or any systematic heterogenization factor).
+For this visualization, we present the sample sizes *required to detect an interaction effect with 80% power* for each combination of effect sizes of the main variable of interest (e.g., treatment effect) for each subgroup of the second factor in the design (e.g., sex, age or any systematic heterogenization factor).
 
 Figure 1C
 ```{r}

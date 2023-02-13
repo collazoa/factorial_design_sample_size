@@ -169,11 +169,84 @@ This relationship was explored through simulations, available only in the supple
 
 For the main figure, we focused on the sample size requirements for detecting interaction effects, with two visualization options.
 
+### Examples of each type of interaction
+
+Figure 1C
+```{r}
+#partially attenuated
+design_result_partial_interaction <- ANOVA_design(
+  design = "2b*2b", n = 10, 
+  mu = c(0.5, 0.7, 1.1, 0.8), sd = 1, 
+  labelnames = c("a",
+                 "control", "treatment",
+                 "b",
+                 "male", "female"), 
+  plot = TRUE)
+
+
+fig_partial <- design_result_partial_interaction$meansplot + 
+  labs(title = "Partially attenuated interaction", x = element_blank(), color = element_blank(), y = "outcome value") +
+  theme_classic() 
+
+fig_partial
+
+#fully attenuated
+design_result_fully_interaction <- ANOVA_design(
+  design = "2b*2b", n = 10, 
+  mu = c(0.1, 0.2, 0.6, 0.2), sd = 0.5, 
+  labelnames = c("a",
+                 "control", "treatment",
+                 "b",
+                 "male", "female"), 
+  plot = TRUE)
+
+fig_full <- design_result_fully_interaction$meansplot + 
+  labs(title = "Fully attenuated interaction", x = element_blank(), color = element_blank(), y = "outcome value") +
+  theme_classic()
+fig_full
+
+#cross-over 
+design_result_crossover_interaction <- ANOVA_design(
+  design = "2b*2b", n = 10, 
+  mu = c(0.3, 0.2, 0.1, 0.7), sd = 0.5, 
+  labelnames = c("a",
+                 "control", "treatment",
+                 "b",
+                 "male", "female"), 
+  plot = TRUE)
+ANOVA_exact(design_result_crossover_interaction) 
+
+
+fig_cross <- design_result_crossover_interaction$meansplot+ 
+  labs(title = "Cross-over interaction", x = element_blank(), color = element_blank(), y = "outcome value") +
+  theme_classic()
+fig_cross
+
+#no interaction
+design_result_no_interaction <- ANOVA_design(
+  design = "2b*2b", n = 10, 
+  mu = c(0.3, 0.2, 0.6, 0.5), sd = 0.5, 
+  labelnames = c("a",
+                 "control", "treatment",
+                 "b",
+                 "male", "female"), 
+  plot = TRUE)
+ANOVA_exact(design_result_no_interaction) 
+fig_no <- design_result_no_interaction$meansplot+ 
+  labs(title = "No interaction", x = element_blank(), color = element_blank(), y = "outcome value") +
+  theme_classic()
+fig_no
+
+#complete figure
+Fig1C = cowplot::plot_grid(fig_no, fig_partial, fig_full, fig_cross, nrow = 1)
+Fig1C
+```
+
 ### Sample size requirements by effect size on each subgroup
 
 For this visualization, we present the sample sizes *required to detect an interaction effect with 80% power* for each combination of effect sizes of the main variable of interest (e.g., treatment effect) for each subgroup of the second factor in the design (e.g., sex, age or any systematic heterogenization factor).
 
-Figure 1C
+Figure 1D
 ```{r}
 # Given is 
 # J = {0,1} (e.g. treatment, intervention)
@@ -243,7 +316,7 @@ report3$round_ntotal[report3$round_ntotal=="Inf"] = NA
 logvalues <- c(1.5, 2, 2.5, 3, 3.5, 4)
 trans <- ceiling(10^logvalues)
 
-Fig1C<- ggplot(data = report3) + 
+Fig1D<- ggplot(data = report3) + 
         geom_tile(mapping = aes(x = d1, y = d2, fill = round_ntotal))+
         geom_hline(yintercept = 0, linetype = "dashed") +
         geom_vline(xintercept = 0, linetype = "dashed") +
@@ -282,14 +355,14 @@ Fig1C<- ggplot(data = report3) +
 
   
   
-Fig1C
+Fig1D
 ```
 
 ### Sample size requirements by interaction effect size
 
 Next, we show the increases in sample size when powering for the interaction effects considering the relationship between this and the main effect of interest.
 
-Figure 1D
+Figure 1E
 ```{r}
 # functions to calculate total N with power = 80% and alpha-level = 0.05 for the main effect a (treatment vs. control)
 
@@ -340,7 +413,7 @@ report4$size_i <- factor(report4$size_i,
                     labels = c("1/2", "1/3", "1/4")) 
 ```
 ```{r}
-Fig1D = ggplot(report4) +
+Fig1E = ggplot(report4) +
   geom_point(aes(x = d_a, y = n, color = size_i, shape = effect))+ 
   scale_y_continuous(limits = c(1,200))+
   labs(x = expression("Cohen's d "["main"]),
@@ -357,12 +430,16 @@ Fig1D = ggplot(report4) +
 
 
 
-Fig1D
+Fig1E
 ```
 
 ## Final figure
 
 ```{r}
-cowplot::plot_grid(Fig1A, Fig1B, Fig1C, Fig1D, nrow = 2, labels = LETTERS)
-ggsave("Figure-1-manuscript.png", width = 40, height = 20, units = "cm")
+Fig1_top = cowplot::plot_grid(Fig1A, Fig1B, nrow = 1, labels = c("A", "B"))
+Fig1_bottom = cowplot::plot_grid(Fig1D, Fig1E, nrow = 1, labels = c("D", "E"))
+
+Fig1_complete = cowplot::plot_grid(Fig1_top, Fig1C, Fig1_bottom, nrow = 3, labels = c("", "C", ""))
+Fig1_complete
+ggsave("Figure-1-manuscript.png", width = 40, height = 30, units = "cm")
 ```

@@ -442,4 +442,5 @@ Fig1_bottom = cowplot::plot_grid(Fig1D, Fig1E, nrow = 1, labels = c("D", "E"))
 Fig1_complete = cowplot::plot_grid(Fig1_top, Fig1C, Fig1_bottom, nrow = 3, labels = c("", "C", ""))
 Fig1_complete
 ggsave("Figure-1-manuscript.png", width = 40, height = 30, units = "cm")
+ggsave("Figure-1-manuscript.tiff", width = 40, height = 30, units = "cm", device = "tiff", dpi = 300)
 ```
